@@ -78,7 +78,7 @@ class Barra(object):
         """
         W = self.calcular_peso(ret)
         
-        fe = ....
+        fe  = [0., -1., 0., -1.].T * (W / 2)
 
         return fe
 
@@ -87,8 +87,15 @@ class Barra(object):
         """Devuelve la fuerza se que debe resistir la barra. Un escalar tipo double. 
         ret: instancia de objeto tipo reticulado
         """
+        L = self.calcular_largo(ret)
+        A = self.calcular_area()        
+        k = self.E * A / L
+        
+        Tθ = [-np.cos(60), -np.sen(60), np.cos(60), np.sen(60)]
+        u_e = 
+        
+        fuerza_barra = k * Tθ * u_e
+    
+        return fuerza_barra
+	
 
-        #Implementar
-
-
-        return se
