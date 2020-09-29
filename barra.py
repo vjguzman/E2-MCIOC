@@ -63,17 +63,22 @@ class Barra(object):
         """Devuelve la rigidez ke del elemento. Arreglo numpy de (4x4)
         ret: instancia de objeto tipo reticulado
         """
+        L = self.calcular_largo(ret)
+        A = self.calcular_area()
+        k = self.E * A / L
+        Tθ = [-np.cos(60), -np.sen(60), np.cos(60), np.sen(60)]
         
-        #implementar
-
+        ke = Tθ.T @ Tθ * k
+        
         return ke
 
     def obtener_vector_de_cargas(self, ret):
         """Devuelve el vector de cargas nodales fe del elemento. Vector numpy de (4x1)
         ret: instancia de objeto tipo reticulado
         """
-
-        #Implementar
+        W = self.calcular_peso(ret)
+        
+        fe = ....
 
         return fe
 
