@@ -68,12 +68,12 @@ f = ret.recuperar_fuerzas()
 print(ret)
 
 ver_reticulado_2d(ret, 
-    opciones_nodos = {
-        "usar_posicion_deformada": True,
-        "factor_amplificacion_deformada": 10.,
-    },
-    opciones_barras = {
-        "color_barras_por_fuerza": True,
-        "ver_numeros_de_barras": False,
-        "ver_fuerza_en_barras": True
-    })
+	opciones_nodos = {
+		"usar_posicion_deformada": True,
+		"factor_amplificacion_deformada": 10.,
+	},
+	opciones_barras = {
+		"color_barras_por_fuerza": True,
+		"ver_numeros_de_barras": False,
+		"ver_fuerza_en_barras": True
+	})
