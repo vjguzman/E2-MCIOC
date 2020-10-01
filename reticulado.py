@@ -6,7 +6,7 @@ Created on Sat Sep 26 13:00:50 2020
 """
 
 import numpy as np
-from scipy.linalg import solve
+from scipy.linalg import solve,inv
 
 class Reticulado(object):
     """Define un reticulado"""
@@ -82,18 +82,18 @@ class Reticulado(object):
             d = [2*ni, (2*ni)+1, 2*nj, (2*nj)+1]
             
             for i in range (len(d)):
-                p=d[i]
+                p = d[i]
                 for j in range(len(d)):
-                    q=d[j]
+                    q = d[j]
 
-                    ke=b.obtener_rigidez(self)
+                    ke = b.obtener_rigidez(self)
                     self.K[p,q] += ke[i,j]
 
-                    fe=b.obtener_vector_de_cargas(self)
+                    fe = b.obtener_vector_de_cargas(self)
                     
                 self.f[p] += fe[i]
         
-        return self.K,self.f 
+        return self.K, self.f 
 
     def resolver_sistema(self):
         """Resuelve el sistema de ecuaciones.
@@ -104,6 +104,7 @@ class Reticulado(object):
         Ngdl = self.Nnodos * self.Ndimensiones
         gdl_libres = np.arange(Ngdl)
         gdl_restringidos = []
+        u_otro = np.zeros((Ngdl), dtype=np.double)
 
         #Identificar gdl_restringidos y llenar u 
         # en valores conocidos.
@@ -118,15 +119,15 @@ class Reticulado(object):
             if len(restriccion) ==2:
                 gdl_restringidos.append(x)
                 gdl_restringidos.append(y)
-                self.u[x]= restriccion[0][1]
-                self.u[y] = restriccion[1][1]
+                u_otro[x] = restriccion[0][1]
+                u_otro[y] = restriccion[1][1]
             else:
                 if restriccion[0][0] ==1:
                     gdl_restringidos.append(y)
-                    self.u[y] = restriccion[0][1]
+                    u_otro[y] = restriccion[0][1]
                 else:
                     gdl_restringidos.append(x)
-                    self.u[x] = restriccion[0][1]
+                    u_otro[x] = restriccion[0][1]
                 
         # con gdl_restringidos encuentro gdl_libres
         gdl_libres = np.setdiff1d(gdl_libres,gdl_restringidos)
@@ -139,31 +140,33 @@ class Reticulado(object):
                 gdl = carga[0]
                 valor = carga[1]
                 gdl_global = 2*nodo + gdl
-                
-
+                self.f[gdl_global] += valor
 
         #1 Particionar:
-        #       K en Kff, Kfc, Kcf y Kcc.
-
-        '''
+        # K en Kff, Kfc, Kcf y Kcc.
+        K = self.K
         Kff = K[np.ix_(gdl_libres,gdl_libres)]
         Kfc = K[np.ix_(gdl_libres,gdl_restringidos)]
         Kcf = Kfc.T
-        Kcc = K[np.ix_(gdl_restringidos,gdl_restringidos)]
-        '''
 
-        #       f en ff y fc
+        #f en ff y fc
+        ff = []
+        F = self.f
+        for f in gdl_libres:
+            ff.append(F[f])
 
-        #       u en uf y uc
-        uf = np.setdiff1d(u, gdl_restringidos)
+        #u en uf y uc
+        uf = np.setdiff1d(u_otro, gdl_restringidos)
         uc = []
-        for valor in u:
+        for valor in u_otro:
             if valor not in uf:
-                uc.append(i)
+                uc.append(valor)
         uc = np.array(uc)
 
         # Resolver para obtener uf -->  Kff uf = ff - Kfc*uc
-        uf = solve(Kff, ff-(Kfc@uc))
+        uf = solve(Kff, ff)
+        # porque termino Kfc*uc se va por uc compuesto por ceros
+        
         #Asignar uf al vector solucion
         self.u[gdl_libres] = uf
 

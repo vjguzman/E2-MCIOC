@@ -115,7 +115,9 @@ class Barra(object):
 
         Tθ = np.array([[_cos], [_sen], [cos], [sen]])
 
-        u_e = np.array([ret.u[2*n_i], ret.u[2*n_i +1], ret.u[2*n_j], ret.u[2*n_j+1]])
+        ni = self.ni
+        nj = self.nj
+        u_e = np.array([ret.u[2*ni], ret.u[2*ni +1], ret.u[2*nj], ret.u[2*nj+1]])
         se = k*(Tθ.T @ u_e)
 
         return se

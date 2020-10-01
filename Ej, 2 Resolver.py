@@ -62,12 +62,11 @@ ret.agregar_restriccion(2, 1, 0)
 ret.agregar_fuerza(4, 1, -F)
 
 ret.ensamblar_sistema()
-#ret.resolver_sistema()
-#f = ret.recuperar_fuerzas()
+ret.resolver_sistema()
+f = ret.recuperar_fuerzas()
 
 print(ret)
 
-'''
 ver_reticulado_2d(ret, 
     opciones_nodos = {
         "usar_posicion_deformada": True,
@@ -78,4 +77,3 @@ ver_reticulado_2d(ret,
         "ver_numeros_de_barras": False,
         "ver_fuerza_en_barras": True
     })
-'''
