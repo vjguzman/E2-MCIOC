@@ -63,39 +63,60 @@ class Barra(object):
         """Devuelve la rigidez ke del elemento. Arreglo numpy de (4x4)
         ret: instancia de objeto tipo reticulado
         """
-        L = self.calcular_largo(ret)
-        A = self.calcular_area()
-        k = self.E * A / L
-        Tθ = [-np.cos(60), -np.sen(60), np.cos(60), np.sen(60)]
-        
-        ke = Tθ.T @ Tθ * k
-        
-        return ke
+	n_i = ret.obtener_coordenada_nodal(self.ni)
+	n_j = ret.obtener_coordenada_nodal(self.nj)
+	xi = n_i[0]
+	yi = n_i[1]
+	xf = n_j[0]
+	yf = n_j[1]
+	_cos = (xi-xf)/self.calcular_largo(ret)
+	cos = (xf-xi)/self.calcular_largo(ret)
+	_sen = (yi-yf)/self.calcular_largo(ret)
+	sen = (yf-yi)/self.calcular_largo(ret)
+
+	L = self.calcular_largo(ret)
+	A = self.calcular_area()
+	k = (self.E * A)/L
+
+	Tθ = np.array([[_cos], [_sen], [cos], [sen]])
+
+	ke = (Tθ @ Tθ.T)*k
+	return ke
 
     def obtener_vector_de_cargas(self, ret):
         """Devuelve el vector de cargas nodales fe del elemento. Vector numpy de (4x1)
         ret: instancia de objeto tipo reticulado
         """
-        W = self.calcular_peso(ret)
-        
-        fe  = [0., -1., 0., -1.].T * (W / 2)
+	w = self.calcular_peso(reticulado)
 
-        return fe
+	fe = ((np.array([0.,-1.,0.,-1.]))*(w/2))
+	return fe
 
 
     def obtener_fuerza(self, ret):
         """Devuelve la fuerza se que debe resistir la barra. Un escalar tipo double. 
         ret: instancia de objeto tipo reticulado
         """
-        L = self.calcular_largo(ret)
-        A = self.calcular_area()        
-        k = self.E * A / L
-        
-        Tθ = [-np.cos(60), -np.sen(60), np.cos(60), np.sen(60)]
-        u_e = 
-        
-        fuerza_barra = k * Tθ * u_e
-    
-        return fuerza_barra
+	n_i = ret.obtener_coordenada_nodal(self.ni)
+	n_j = ret.obtener_coordenada_nodal(self.nj)
+	xi = n_i[0]
+	yi = n_i[1]
+	xf = n_j[0]
+	yf = n_j[1]
+	_cos = (xi-xj)/self.calcular_largo(ret)
+	cos = (xj-xi)/self.calcular_largo(ret)
+	_sen = (yi-yf)/self.calcular_largo(ret)
+	sen = (yf-yi)/self.calcular_largo(ret)
+
+	L = self.calcular_largo(ret)
+	A = self.calcular_area()
+	k = (self.E * A)/L
+
+	Tθ = np.array([[_cos], [_sen], [cos], [sen]])
+
+	u_e = np.array([ret.u[2*n_i], ret.u[2*n_i +1], ret.u[2*n_j], ret.u[2*n_j+1]])
+	se = k*(Tθ.T @ u_e)
+
+	return se
 	
 
