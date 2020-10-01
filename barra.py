@@ -81,16 +81,17 @@ class Barra(object):
         Tθ = np.array([[_cos], [_sen], [cos], [sen]])
 
         ke = (Tθ @ Tθ.T)*k
-    return ke
+
+        return ke
 
     def obtener_vector_de_cargas(self, ret):
         """Devuelve el vector de cargas nodales fe del elemento. Vector numpy de (4x1)
         ret: instancia de objeto tipo reticulado
         """
-        w = self.calcular_peso(reticulado)
+        w = self.calcular_peso(ret)
 
         fe = ((np.array([0.,-1.,0.,-1.]))*(w/2))
-    return fe
+        return fe
 
 
     def obtener_fuerza(self, ret):
@@ -117,6 +118,6 @@ class Barra(object):
         u_e = np.array([ret.u[2*n_i], ret.u[2*n_i +1], ret.u[2*n_j], ret.u[2*n_j+1]])
         se = k*(Tθ.T @ u_e)
 
-    return se
+        return se
     
 

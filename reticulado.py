@@ -70,28 +70,32 @@ class Reticulado(object):
 		#metodo de rigidez directa
         Ndimensiones = 2
         Ngdl = self.Nnodos + Ndimensiones
-		#iterar sobre las barras:
+		
+        #iterar sobre las barras:
         self.K = np.zeros((Ngdl,Ngdl), dtype = np.double)
         self.f = np.zeros((Ngdl), dtype = np.double)
         self.u = np.zeros((Ngdl), dtype = np.double)
 
-        for b in self.barras:
-            n_i = b.ni
-            n_j = b.nj
-            d = [2*n_i, (2*n_i)+1, 2*n_j, (2*n_j)+1]
+        #Implementar
+        for barra in self.barras:
+            nodo1=barra.ni
+            nodo2=barra.nj
+            d=[2*nodo1, ((2*nodo1)+1), 2*nodo2, ((2*nodo2)+1)]
             
-            for i in range(len(d)):
-                p = d[i] 
+            for i in range (len(d)):
+                p=d[i]
                 for j in range(len(d)):
-                    q = d[j]
-                    ke = b.obtener_rigidez(self)
-                    self.K[p,q] += ke[i,j]
-                    fe = b.obtener_vector_de_cargas(self)
-                self.f[p] += fe[i]
+                    q=d[j]
+                    ke=barra.obtener_rigidez(self)
+                    self.K[p,q]+=ke[i,j]
 
+                    fe=barra.obtener_vector_de_cargas(self)
+                    
+                self.f[p]+=fe[i]
+        
         return self.K, self.f 
 
-     def resolver_sistema(self):
+    def resolver_sistema(self):
         """Resuelve el sistema de ecuaciones.
         La solucion queda guardada en self.u
         """
@@ -105,6 +109,28 @@ class Reticulado(object):
         # en valores conocidos.
         #
         # Hint: la funcion numpy.setdiff1d es util
+        
+        #Pre-llenar el vector u
+        for nodo in self.restricciones:
+            restriccion = self.restricciones[nodo]
+            x = nodo*2
+            y = nodo*2 +1
+            if len(restriccion) ==2:
+                gdl_restringidos.append(x)
+                gdl_restringidos.append(y)
+                self.u[x]= restriccion[0][1]
+                self.u[y] = restriccion[1][1]
+            else:
+                if restriccion[0][0] ==1:
+                    gdl_restringidos.append(y)
+                    self.u[y] = restriccion[0][1]
+                else:
+                    gdl_restringidos.append(x)
+                    self.u[x] = restriccion[0][1]
+                
+        # con gdl_restringidos encuentro gdl_libres
+        gdl_libres = np.setdiff1d(gdl_libres,gdl_restringidos)
+        gdl_restringidos = np.array(gdl_restringidos)
 
 
         #Agregar cargas nodales a vector de cargas 
@@ -118,17 +144,33 @@ class Reticulado(object):
 
         #1 Particionar:
         #       K en Kff, Kfc, Kcf y Kcc.
+
+        '''
+        Kff = K[np.ix_(gdl_libres,gdl_libres)]
+        Kfc = K[np.ix_(gdl_libres,gdl_restringidos)]
+        Kcf = Kfc.T
+        Kcc = K[np.ix_(gdl_restringidos,gdl_restringidos)]
+        '''
+
         #       f en ff y fc
+
         #       u en uf y uc
-        
+        uf = np.setdiff1d(u, gdl_restringidos)
+        uc = []
+        for valor in u:
+            if valor not in uf:
+                uc.append(i)
+        uc = np.array(uc)
 
         # Resolver para obtener uf -->  Kff uf = ff - Kfc*uc
-        
+        uf = solve(Kff, ff-(Kfc@uc))
         #Asignar uf al vector solucion
         self.u[gdl_libres] = uf
 
         #Marcar internamente que se tiene solucion
         self.tiene_solucion = True
+
+        return self.u
 
     def obtener_desplazamiento_nodal(self, n):
         """Entrega desplazamientos en el nodo n como un vector numpy de (2x1) o (3x1)
